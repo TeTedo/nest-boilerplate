@@ -4,8 +4,7 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ENV_DB_HOST_KEY } from './common/const/env-keys.const';
@@ -17,6 +16,7 @@ import { MemberModule } from './modules/member/member.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SampleModule } from './modules/sample/sample.module';
 import { LogMiddleware } from './common/middleware/log.middleware';
+import { ResponseInterceptor } from './common/interceptor/response.interceptor';
 
 @Module({
   imports: [
@@ -38,8 +38,12 @@ import { LogMiddleware } from './common/middleware/log.middleware';
     AuthModule,
     SampleModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

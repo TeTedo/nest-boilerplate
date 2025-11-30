@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { HttpExceptionFilter } from './common/exception-filter/http.exception-filter';
+import { AllExceptionsFilter } from './common/exception-filter/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,7 +29,9 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // 전역 예외 필터: 모든 예외를 일관된 형식으로 처리
+  // ResponseInterceptor는 AppModule에서 APP_INTERCEPTOR로 등록됨
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   await app.listen(process.env.PORT ?? 8080, () => {
     if (process.send) {
@@ -38,4 +40,7 @@ async function bootstrap() {
     console.log(`listening on port : ${process.env.PORT}`);
   });
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
